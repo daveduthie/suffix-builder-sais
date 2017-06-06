@@ -3,6 +3,7 @@ package com.ystervark;
 import org.junit.Test;
 import org.junit.Ignore;
 
+import com.ystervark.SuffixArray.Buckets;
 import com.ystervark.SuffixArray.SuffixType;
 import com.ystervark.SuffixArray.Text;
 
@@ -76,7 +77,22 @@ public class SuffixArrayTest {
 		SuffixType[] types = SuffixArray.computeSuffixTypes(text);
 
 		assertTrue("identical strings are the same", SuffixArray.wStringsEqual(1, 3, text, types));
-		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(1, 5, text, types));
 		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(3, 5, text, types));
+		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(5, 9, text, types));
+		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(3, 13, text, types));
+	}
+
+	@Test
+	// @Ignore
+	public void getBucketBoundaries() {
+		Buckets b = new Buckets(256);
+		Text text = new SuffixArray.Alphabetic("TGTGTGTGCACCG$".toCharArray());
+		for (int i = 0; i < text.size(); ++i) {
+			b.insert_vocab(text.get_at(i));
+		}
+
+		assertTrue("correct number of $'s", b.get_count('$') == 1);
+		assertTrue("correct number of C's", b.get_count('C') == 3);
+		assertTrue("correct number of T's", b.get_count('T') == 4);
 	}
 }

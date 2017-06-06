@@ -85,8 +85,64 @@ public class SuffixArray {
 		while (true) {
 			if (text.get_at(i) != text.get_at(j) || types[i] != types[j])
 				return false;
-      if ( (types[i] == SuffixType.VALLEY || types[j] == SuffixType.VALLEY) && i != w1 )
-          return true;
+			if ((types[i] == SuffixType.VALLEY || types[j] == SuffixType.VALLEY) && i != w1)
+				return true;
+		}
+	}
+
+	public static class Buckets {
+		// vocab holds a (usually unsorted) array of chars/ints in a Text
+		private int[] vocab;
+		// counts holds the number of occurences of `e` at `counts[e]`
+		private int[] counts;
+		// pointers holds a pointer to the head or tail of bucket `e` at
+		// `pointers[e]`
+		private int[] pointers;
+
+		public Buckets(int n) {
+			this.vocab = new int[0];
+			this.counts = new int[n];
+		}
+
+		public void insert_vocab(int e) {
+			if (e >= vocab.length) {
+				vocab = java.util.Arrays.copyOf(vocab, vocab.length + 1);
+			}
+			vocab[vocab.length - 1] = e;
+
+			if (e >= counts.length) {
+				counts = java.util.Arrays.copyOf(counts, e + 1);
+				// or throw something
+			}
+			counts[e] += 1;
+		}
+
+		public int get_count(int e) {
+			if (e >= counts.length)
+				throw new IllegalArgumentException(e + " is not in the current vocabulary");
+			return counts[e];
+		}
+
+		// calculate pointers to head of each \ bucket
+		public void computeBucketBounds(Text t) {
+			// rebuild vocab list
+			vocab = new int[vocab.length];
+			for (int i = 0; i < t.size(); ++i)
+				insert_vocab(t.get_at(i));
+			java.util.Arrays.sort(vocab);
+
+			// iterate over vocab
+			if (vocab[0] != 1)
+				throw new IllegalStateException("Muffed it! There should be one $ in there.");
+			int acc = 1;
+			int last_in_vocab = vocab[vocab.length - 1];
+			// this is big (!) but it simplifies element access
+			pointers = new int[last_in_vocab + 1];
+			for (int i = 1; i < vocab.length; ++i) {
+				pointers[i - 1] = acc;
+				int e = vocab[i];
+				acc += counts[e];
+			}
 		}
 	}
 }
