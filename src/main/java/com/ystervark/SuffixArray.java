@@ -139,7 +139,7 @@ public class SuffixArray {
 			// this is big (!) but it simplifies element access
 			pointers = new int[last_in_vocab + 1];
 			for (int i = 1; i < vocab.length; ++i) {
-				pointers[i - 1] = acc;
+				pointers[i] = acc;
 				int e = vocab[i];
 				acc += counts[e];
 			}
