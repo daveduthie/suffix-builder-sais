@@ -79,5 +79,14 @@ public class SuffixArray {
 		return types;
 	}
 
+	public static boolean wStringsEqual(int w1, int w2, Text text, SuffixType[] types) {
+		int i = w1;
+		int j = w2;
+		while (true) {
+			if (text.get_at(i) != text.get_at(j) || types[i] != types[j])
+				return false;
+      if ( (types[i] == SuffixType.VALLEY || types[j] == SuffixType.VALLEY) && i != w1 )
+          return true;
+		}
 	}
 }
