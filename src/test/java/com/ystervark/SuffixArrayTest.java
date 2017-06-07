@@ -74,7 +74,7 @@ public class SuffixArrayTest {
 
 	@Test
 	// @Ignore
-	public void textDotEqual() {
+	public void wStringsEqual() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
 		SuffixType[] types = SuffixArray.computeSuffixTypes(text);
@@ -84,6 +84,4 @@ public class SuffixArrayTest {
 		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(5, 9, text, types));
 		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(3, 13, text, types));
 	}
-
-	
 }
