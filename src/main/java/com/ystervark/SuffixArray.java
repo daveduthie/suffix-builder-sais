@@ -95,27 +95,31 @@ public class SuffixArray {
 	public static class Buckets {
 		// vocab holds a (usually unsorted) array of chars/ints in a Text
 		private int[] vocab;
+		private int v_end;
 		// counts holds the number of occurences of `e` at `counts[e]`
 		private int[] counts;
 		// pointers holds a pointer to the head or tail of bucket `e` at
 		// `pointers[e]`
 		private int[] pointers;
+		private boolean built_vocab = false;
 
 		public Buckets(int n) {
-			this.vocab = new int[0];
+			this.vocab = new int[n];
 			this.counts = new int[n];
+			this.v_end = 0;
 		}
 
 		public void insert_vocab(int e) {
-			if (e >= vocab.length) {
-				vocab = java.util.Arrays.copyOf(vocab, vocab.length + 1);
-			}
-			vocab[vocab.length - 1] = e;
-
 			if (e >= counts.length) {
-				counts = java.util.Arrays.copyOf(counts, e + 1);
-				// or throw something
+				// counts = java.util.Arrays.copyOf(counts, e + 1);
+				throw new IllegalArgumentException(
+						"You said your alphabet was < " + vocab.length + " but now you've given me a " + e + "!");
 			}
+
+			// this means it's the first time we're ecountering this
+			// character
+			if (counts[e] == 0)
+				vocab[v_end++] = e;
 			counts[e] += 1;
 		}
 
@@ -125,26 +129,48 @@ public class SuffixArray {
 			return counts[e];
 		}
 
-		// calculate pointers to head of each \ bucket
-		public void computeBucketBounds(Text t) {
-			// rebuild vocab list
+		public void build_vocab_list(Text t) {
 			vocab = new int[vocab.length];
 			for (int i = 0; i < t.size(); ++i)
 				insert_vocab(t.get_at(i));
-			java.util.Arrays.sort(vocab);
+			vocab = java.util.Arrays.copyOf(vocab, v_end);// trim to size
+			java.util.Arrays.sort(vocab);// or else all the zeroes pop to front
 
-			// iterate over vocab
-			if (vocab[0] != 1)
-				throw new IllegalStateException("Muffed it! There should be one $ in there.");
-			int acc = 1;
-			int last_in_vocab = vocab[vocab.length - 1];
 			// this is big (!) but it simplifies element access
+			int last_in_vocab = vocab[vocab.length - 1];
 			pointers = new int[last_in_vocab + 1];
-			for (int i = 1; i < vocab.length; ++i) {
-				pointers[i] = acc;
+
+			built_vocab = true;
+		}
+
+		public void get_head_ptrs() {
+			if (!built_vocab)
+				throw new IllegalStateException("Muffed it! You need to build the vocab list first.");
+
+			for (int i = 0, acc = 0; i < vocab.length; ++i) {
 				int e = vocab[i];
+				pointers[e] = acc;
 				acc += counts[e];
 			}
+		}
+
+		public void get_tail_ptrs() {
+			if (!built_vocab)
+				throw new IllegalStateException("Muffed it! You need to build the vocab list first.");
+
+			for (int i = 0, acc = 0; i < vocab.length; ++i) {
+				int e = vocab[i];
+				acc += counts[e]; // acc now points to first head of next bucket
+				pointers[e] = acc - 1;
+			}
+		}
+
+		public int get_pointer(int i) {
+			return pointers[i];
+		}
+
+		public int get_vocab(int i) {
+			return vocab[i];
 		}
 	}
 }

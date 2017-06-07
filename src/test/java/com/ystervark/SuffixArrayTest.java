@@ -3,7 +3,6 @@ package com.ystervark;
 import org.junit.Test;
 import org.junit.Ignore;
 
-import com.ystervark.SuffixArray.Buckets;
 import com.ystervark.SuffixArray.SuffixType;
 import com.ystervark.SuffixArray.Text;
 
@@ -12,6 +11,7 @@ import static org.junit.Assert.*;
 public class SuffixArrayTest {
 
 	@Test
+	// @Ignore
 	public void canInstantiateText() {
 		char[] c = "a".toCharArray();
 		Text t = new SuffixArray.Alphabetic(c);
@@ -20,7 +20,7 @@ public class SuffixArrayTest {
 
 	@Test
 	@Ignore
-	public void SuffixTypesTestEasyPeasy() {
+	public void suffixTypesTestEasyPeasy() {
 		char[] c = "cgat$".toCharArray();
 		Text t = new SuffixArray.Alphabetic(c);
 		SuffixType[] types = SuffixArray.computeSuffixTypes(t);
@@ -33,7 +33,8 @@ public class SuffixArrayTest {
 	}
 
 	@Test
-	public void SuffixTypesTest() {
+	// @Ignore
+	public void suffixTypesTest() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text t = new SuffixArray.Alphabetic(c);
 		SuffixType[] types = SuffixArray.computeSuffixTypes(t);
@@ -55,7 +56,8 @@ public class SuffixArrayTest {
 	}
 
 	@Test
-	public void TextDotGetAndSet() {
+	// @Ignore
+	public void textDotGetAndSet() {
 		char[] c = "CGAT$".toCharArray();
 		int[] i = { 3, 1, 4, 2, 0 };
 		Text t1 = new SuffixArray.Alphabetic(c);
@@ -71,7 +73,8 @@ public class SuffixArrayTest {
 	}
 
 	@Test
-	public void TextDotEqual() {
+	// @Ignore
+	public void textDotEqual() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
 		SuffixType[] types = SuffixArray.computeSuffixTypes(text);
@@ -82,17 +85,5 @@ public class SuffixArrayTest {
 		assertFalse("non-identical strings are not the same", SuffixArray.wStringsEqual(3, 13, text, types));
 	}
 
-	@Test
-	// @Ignore
-	public void getBucketBoundaries() {
-		Buckets b = new Buckets(256);
-		Text text = new SuffixArray.Alphabetic("TGTGTGTGCACCG$".toCharArray());
-		for (int i = 0; i < text.size(); ++i) {
-			b.insert_vocab(text.get_at(i));
-		}
-
-		assertTrue("correct number of $'s", b.get_count('$') == 1);
-		assertTrue("correct number of C's", b.get_count('C') == 3);
-		assertTrue("correct number of T's", b.get_count('T') == 4);
-	}
+	
 }
