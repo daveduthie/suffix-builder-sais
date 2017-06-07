@@ -87,6 +87,8 @@ public class SuffixArray {
 				return false;
 			if ((types[i] == SuffixType.VALLEY || types[j] == SuffixType.VALLEY) && i != w1)
 				return true;
+			i++;
+			j++;
 		}
 	}
 
