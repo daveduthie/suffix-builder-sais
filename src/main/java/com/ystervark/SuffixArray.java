@@ -62,8 +62,7 @@ public class SuffixArray {
 		ASCENDING, DESCENDING, VALLEY
 	}
 
-	public static SuffixType[] computeSuffixTypes(Text t) {
-		SuffixType[] types = new SuffixType[t.size()];
+	public static void computeSuffixTypes(Text t, SuffixType[] types) {
 		types[t.size() - 1] = SuffixType.VALLEY;
 		for (int i = t.size() - 1; i > 0; --i) {
 			int curr = t.get_at(i);
@@ -81,8 +80,6 @@ public class SuffixArray {
 				types[i - 1] = types[i];
 			}
 		}
-
-		return types;
 	}
 
 	public static boolean wStringsEqual(int w1, int w2, Text text, SuffixType[] types) {
