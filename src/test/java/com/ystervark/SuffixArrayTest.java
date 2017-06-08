@@ -61,7 +61,7 @@ public class SuffixArrayTest {
 		char[] c = "CGAT$".toCharArray();
 		int[] i = { 3, 1, 4, 2, 0 };
 		Text t1 = new SuffixArray.Alphabetic(c);
-		Text t2 = new SuffixArray.Numeric(i);
+		Text t2 = new SuffixArray.Numeric(i, 0, i.length - 1);
 
 		assertTrue(t1.get_at(0) == 67);
 		t1.set_at(0, 65);

@@ -27,28 +27,34 @@ public class SuffixArray {
 			return source[i];
 		}
 
-		public void set_at(int k, int v) {
-			source[k] = (char) v;
+		public void set_at(int i, int v) {
+			source[i] = (char) v;
 		}
 	}
 
 	public static final class Numeric implements Text {
 		private int[] source;
+		// We're sharing arrays, so have to delineate which part of the array
+		// we're allowed to work with
+		private int begin;
+		private int end;// points to last index + 1
 
-		public Numeric(int[] ints) {
-			this.source = ints;
+		public Numeric(int[] text, int begin, int end) {
+			this.begin = begin;
+			this.end = end;
+			this.source = text;
 		}
 
 		public int size() {
-			return source.length;
+			return end - begin;
 		}
 
 		public int get_at(int i) {
-			return source[i];
+			return source[begin + i];
 		}
 
-		public void set_at(int k, int v) {
-			source[k] = v;
+		public void set_at(int i, int v) {
+			source[begin + i] = v;
 		}
 	}
 
