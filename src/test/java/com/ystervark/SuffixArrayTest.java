@@ -23,7 +23,7 @@ public class SuffixArrayTest {
 	public void suffixTypesTestEasyPeasy() {
 		char[] c = "cgat$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
-		SuffixType[] types = new SuffixType[text.length];
+		SuffixType[] types = new SuffixType[text.size()];
 		SuffixArray.computeSuffixTypes(text, types);
 
 		assertTrue("0th type is correct", types[0] == SuffixType.ASCENDING);
@@ -38,7 +38,7 @@ public class SuffixArrayTest {
 	public void suffixTypesTest() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
-		SuffixType[] types = new SuffixType[text.length];
+		SuffixType[] types = new SuffixType[text.size()];
         SuffixArray.computeSuffixTypes(text, types);
 
 		assertTrue(types[0] == SuffixType.DESCENDING);
@@ -63,7 +63,7 @@ public class SuffixArrayTest {
 		char[] c = "CGAT$".toCharArray();
 		int[] i = { 3, 1, 4, 2, 0 };
 		Text t1 = new SuffixArray.Alphabetic(c);
-		Text t2 = new SuffixArray.Numeric(i, 0, i.length - 1);
+		Text t2 = new SuffixArray.Numeric(i, 0, i.length);
 
 		assertTrue(t1.get_at(0) == 67);
 		t1.set_at(0, 65);
@@ -79,7 +79,7 @@ public class SuffixArrayTest {
 	public void wStringsEqual() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
-		SuffixType[] types = new SuffixType[text.length];
+		SuffixType[] types = new SuffixType[text.size()];
         SuffixArray.computeSuffixTypes(text, types);
 
 		assertTrue("identical strings are the same", SuffixArray.wStringsEqual(1, 3, text, types));

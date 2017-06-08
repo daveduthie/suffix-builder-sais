@@ -167,9 +167,13 @@ public class SuffixArray {
 				pointers[e] = acc - 1;
 			}
 		}
-
-		public int get_pointer(int i) {
-			return pointers[i];
+		
+		public int get_tail_ptr(int i) {
+		  return pointers[i--];
+		}
+		
+		public int get_head_ptr(int i) {
+		  return pointers[i++];
 		}
 
 		public int get_vocab(int i) {

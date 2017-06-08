@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.ystervark.SuffixArray.Buckets;
 import com.ystervark.SuffixArray.Text;
 
-public class BinsTest {
+public class BucketsTest {
 
 	Buckets b;
 	Text text;
@@ -22,7 +22,7 @@ public class BinsTest {
 
 	@Test
 	// @Ignore
-	public void binsBuildVocab() {
+	public void buildVocab() {
 		assertTrue("$ in vocab list", b.get_vocab(0) == '$');
 		assertTrue("A in vocab list", b.get_vocab(1) == 'A');
 		assertTrue("C in vocab list", b.get_vocab(2) == 'C');
@@ -32,7 +32,7 @@ public class BinsTest {
 
 	@Test
 	// @Ignore
-	public void binsGetCounts() {
+	public void getCounts() {
 		assertTrue("correct number of $'s", b.get_count('$') == 1);
 		assertTrue("correct number of A's", b.get_count('A') == 1);
 		assertTrue("correct number of C's", b.get_count('C') == 3);
@@ -42,25 +42,25 @@ public class BinsTest {
 
 	@Test
 	// @Ignore
-	public void binsGetHeadPtrs() {
+	public void getHeadPtrs() {
 		b.get_head_ptrs();
 
-		assertTrue("correct $ head", b.get_pointer('$') == 0);
-		assertTrue("correct A head", b.get_pointer('A') == 1);
-		assertTrue("correct C head", b.get_pointer('C') == 2);
-		assertTrue("correct G head", b.get_pointer('G') == 5);
-		assertTrue("correct T head", b.get_pointer('T') == 10);
+		assertTrue("correct $ head", b.get_head_ptr('$') == 0);
+		assertTrue("correct A head", b.get_head_ptr('A') == 1);
+		assertTrue("correct C head", b.get_head_ptr('C') == 2);
+		assertTrue("correct G head", b.get_head_ptr('G') == 5);
+		assertTrue("correct T head", b.get_head_ptr('T') == 10);
 	}
 
 	@Test
 	// @Ignore
-	public void binsGetTailPtrs() {
+	public void getTailPtrs() {
 		b.get_tail_ptrs();
 
-		assertTrue("correct $ tail", b.get_pointer('$') == 0);
-		assertTrue("correct A tail", b.get_pointer('A') == 1);
-		assertTrue("correct C tail", b.get_pointer('C') == 4);
-		assertTrue("correct G tail", b.get_pointer('G') == 9);
-		assertTrue("correct T tail", b.get_pointer('T') == 13);
+		assertTrue("correct $ tail", b.get_tail_ptr('$') == 0);
+		assertTrue("correct A tail", b.get_tail_ptr('A') == 1);
+		assertTrue("correct C tail", b.get_tail_ptr('C') == 4);
+		assertTrue("correct G tail", b.get_tail_ptr('G') == 9);
+		assertTrue("correct T tail", b.get_tail_ptr('T') == 13);
 	}
 }
