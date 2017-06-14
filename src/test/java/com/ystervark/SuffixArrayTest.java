@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class SuffixArrayTest {
 
 	@Test
-	// @Ignore
+	@Ignore
 	public void canInstantiateText() {
 		char[] c = "a".toCharArray();
 		Text t = new SuffixArray.Alphabetic(c);
@@ -35,7 +35,7 @@ public class SuffixArrayTest {
 	}
 
 	@Test
-	// @Ignore
+	@Ignore
 	public void suffixTypesTest() {
 		char[] c = "TGTGTGTGCACCG$".toCharArray();
 		Text text = new SuffixArray.Alphabetic(c);
