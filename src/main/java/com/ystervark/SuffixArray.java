@@ -40,7 +40,7 @@ public class SuffixArray {
 	}
 
 	public static int[] compute(String s) {
-		SuffArray sa = new SuffArray(new int[s.length()], 0, s.length());
+		Numeric sa = new Numeric(new int[s.length()], 0, s.length());
 		Text text = new Alphabetic(s.toCharArray());
 		Buckets buckets = new Buckets();
 		SAIS(text, sa, buckets);
@@ -61,6 +61,8 @@ public class SuffixArray {
 		public void pat_down(int start, int end);
 
 		public String toString();
+		
+		public int[] value();
 	}
 
 	public static class Alphabetic implements Text {
@@ -95,8 +97,17 @@ public class SuffixArray {
 		public String toString() {
 			return Arrays.toString(source);
 		}
+		
+		public int[] value() {
+		  int[] ret = new int[source.length];
+		  for(int i = 0; i < source.length; ++i) {
+		    ret[i] = (int) source[i];
+		  }
+			return ret;
+		}
 	}
 
+  /*
 	public static class SuffArray implements Text {
 		private int[] source;
 		private int begin;
@@ -138,6 +149,7 @@ public class SuffixArray {
 			return Arrays.toString(source);
 		}
 	}
+	*/
 
 	public static class Numeric implements Text {
 		private int[] source;
@@ -177,6 +189,10 @@ public class SuffixArray {
 		public String toString() {
 			return Arrays.toString(source);
 		}
+		
+		public int[] value() {
+			return source;
+		}
 	}
 
 	public static enum SuffixType {
@@ -206,7 +222,7 @@ public class SuffixArray {
 		return types;
 	}
 
-	public static void SAIS(Text text, SuffArray sa, Buckets buckets) {
+	public static void SAIS(Text text, Text sa, Buckets buckets) {
 		if (text.size() == 1) {
 			sa.set_at(0, 0);
 			return;
@@ -253,7 +269,7 @@ public class SuffixArray {
 		// STEP 1
 		//// insert down prefixes
 		buckets.get_head_ptrs();
-		for (int i = 0; i < sa.end; ++i) {
+		for (int i = 0; i < sa.size(); ++i) {
 			int curr = sa.get_at(i);
 			if (curr > 0) {
 				if (types[curr - 1] == SuffixType.DESCENDING) {
@@ -268,7 +284,7 @@ public class SuffixArray {
 		// STEP 2
 		//// insert up prefixes
 		buckets.get_tail_ptrs();
-		for (int i = sa.end - 1; i >= 0; --i) {
+		for (int i = sa.size() - 1; i >= 0; --i) {
 			int curr = sa.get_at(i);
 			if (curr > 0) {
 				if (types[curr - 1] == SuffixType.ASCENDING || types[curr - 1] == SuffixType.VALLEY) {
@@ -327,8 +343,8 @@ public class SuffixArray {
 			//// recur!
 			// prn("recursion!");
 			types = null;// throw away to save memory. can recompute later
-			Text text_prime = new Numeric(sa.source, half, half + num_w_strs);
-			SuffArray sa_prime = new SuffArray(sa.source, 0, num_w_strs);
+			Text text_prime = new Numeric(sa.value(), half, half + num_w_strs);
+			Numeric sa_prime = new Numeric(sa.value(), 0, num_w_strs);
 
 			SAIS(text_prime, sa_prime, buckets);
 
