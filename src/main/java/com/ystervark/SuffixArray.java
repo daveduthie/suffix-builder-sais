@@ -3,9 +3,10 @@ package com.ystervark;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 public class SuffixArray {
 
@@ -15,26 +16,49 @@ public class SuffixArray {
 		System.out.println();
 	}
 
-	public static void prnText(Text t) {
-		for (int i = 0; i < t.size(); ++i) {
-			System.out.print(t.get_at(i) + " ");
+	public static void prnBool(boolean[] bs) {
+		for (int i = 0; i < bs.length; ++i) {
+			if (bs[i]) {
+				System.out.println(i);
+			}
 		}
 		System.out.println();
 	}
 
+	static class fastscanner {
+		StringTokenizer tok = new StringTokenizer("");
+		BufferedReader in;
+
+		fastscanner() {
+			in = new BufferedReader(new InputStreamReader(System.in));
+		}
+
+		String next() throws IOException {
+			while (!tok.hasMoreElements())
+				tok = new StringTokenizer(in.readLine());
+			return tok.nextToken();
+		}
+
+		int nextint() throws IOException {
+			return Integer.parseInt(next());
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
-		BufferedReader in = new BufferedReader(new
-		InputStreamReader(System.in));
-		PrintWriter out = new PrintWriter(System.out);
+		fastscanner scanner = new fastscanner();
+		String text = scanner.next() + "$";
+		int[] suffixArray = compute(text);
+		int patternCount = scanner.nextint();
+		boolean[] occurs = new boolean[text.length()];
+		for (int patternIndex = 0; patternIndex < patternCount; ++patternIndex) {
+			String pattern = scanner.next();
+			HashSet<Integer> occurrences = matchesInText(text, suffixArray, pattern);
+			for (int x : occurrences) {
+				occurs[x] = true;
+			}
+		}
 
-		String text = in.readLine();
-		int[] result = compute(text);
-
-		for (int e : result)
-		out.println(e);
-
-		in.close();
-		out.close();
+		prnBool(occurs);
 
 		// stressTest();
 	}
@@ -45,7 +69,109 @@ public class SuffixArray {
 		Buckets buckets = new Buckets();
 		SAIS(text, sa, buckets);
 
+		// for (int i = 0; i < sa.size(); ++i) {
+		// int x = sa.get_at(i);
+		// prn(i, x, "->", s.substring(x));
+		// }
+
 		return sa.value();
+	}
+
+	public static int suffixCompare(String text, int[] suffixArray, String pattern, int pos, int skip) {
+		// prn("called suffixCompare at", pos, "-->", pattern, "==", text.substring(pos), "?");
+		/* start skip after beginning of pattern */
+		int i = skip;
+		/*
+		 * start at skip after pos'th lexicographically-sorted suffix of text
+		 */
+		int j = suffixArray[pos] + skip;
+		while (i < pattern.length() && j < text.length()) {
+			char p = pattern.charAt(i);
+			char t = text.charAt(j);
+			if (p > t) {
+				return 1;
+			} else if (p < t) {
+				return -1;
+			} else {
+				i += 1;
+				j += 1;
+			}
+		}
+		return 0;
+	}
+
+	public static int binarySearch(String text, int[] suffixArray, String pattern, int skip, boolean first) {
+		// prn("searching for", (first) ? "first" : "last", "position of", pattern, "in", text);
+
+		int lo = 0;
+		int hi = suffixArray.length - 1;
+
+		while (lo <= hi) {
+			int mid = (lo + hi) / 2;
+			// prn("searching for first between", lo, "-->", mid, "<--", hi);
+			int cmp = suffixCompare(text, suffixArray, pattern, mid, skip);
+			// prn("cmp:", cmp);
+			if (cmp == 0) {
+				if (first) {
+					if (mid == 0 || suffixCompare(text, suffixArray, pattern, mid - 1, skip) > 0) {
+						// prn("gotcha:", mid);
+						return mid;
+					} else {
+						hi = mid;
+					}
+				} else {
+					if (mid == suffixArray.length - 1 || suffixCompare(text, suffixArray, pattern, mid + 1, skip) < 0) {
+						// prn("gotcha:", mid);
+						return mid;
+					} else {
+						lo = mid + 1;
+					}
+				}
+			} else if (cmp < 0) {
+				// gotta look lower
+				hi = mid;
+			} else if (cmp > 0) {
+				// gotta look higher
+				lo = mid + 1;
+			} else {
+				throw new IllegalStateException("tantrum");
+			}
+		}
+
+		// prn("cannot find", pattern);
+		return -1;
+	}
+
+	public static HashSet<Integer> matchesInText(String text, int[] sa, String pattern) {
+		int skip = 0;
+
+		// find first idx of match
+		int firstIdx = binarySearch(text, sa, pattern, skip, true);
+		// find last idx of match
+		int lastIdx = binarySearch(text, sa, pattern, skip, false);
+		// prn("matches are between", firstIdx, "and", lastIdx);
+
+		HashSet<Integer> result = new HashSet<Integer>();
+		if (firstIdx != -1) {
+			for (int i = firstIdx; i <= lastIdx; ++i) {
+				result.add(sa[i]);
+				// prn(sa[i]);
+			}
+		}
+
+		return result;
+	}
+
+	public static HashSet<Integer> multiMatchesInText(String text, String[] patterns) {
+		int[] sa = compute(text);
+		HashSet<Integer> locations = new HashSet<Integer>();
+		for (String p : patterns) {
+			// prn("examining", p);
+			HashSet<Integer> matches = matchesInText(text, sa, p);
+			locations.addAll(matches);
+		}
+
+		return locations;
 	}
 
 	public static interface Text {
@@ -61,7 +187,7 @@ public class SuffixArray {
 		public void pat_down(int start, int end);
 
 		public String toString();
-		
+
 		public int[] value();
 	}
 
@@ -97,59 +223,15 @@ public class SuffixArray {
 		public String toString() {
 			return Arrays.toString(source);
 		}
-		
+
 		public int[] value() {
-		  int[] ret = new int[source.length];
-		  for(int i = 0; i < source.length; ++i) {
-		    ret[i] = (int) source[i];
-		  }
+			int[] ret = new int[source.length];
+			for (int i = 0; i < source.length; ++i) {
+				ret[i] = (int) source[i];
+			}
 			return ret;
 		}
 	}
-
-  /*
-	public static class SuffArray implements Text {
-		private int[] source;
-		private int begin;
-		private int end;
-
-		public SuffArray(int[] source, int begin, int end) {
-			this.source = source;
-			this.begin = begin;
-			this.end = end;
-		}
-
-		public final int size() {
-			return end - begin;
-		}
-
-		public int get_at(int i) {
-			return source[begin + i];
-		}
-
-		public void set_at(int i, int v) {
-			source[begin + i] = v;
-		}
-
-		public int[] value() {
-			return source;
-		}
-
-		public void pat_down() {
-			for (int i = 0; i < size(); ++i)
-				set_at(i, -1);
-		}
-
-		public void pat_down(int start, int end) {
-			for (int i = start; i < end; ++i)
-				set_at(i, -1);
-		}
-
-		public String toString() {
-			return Arrays.toString(source);
-		}
-	}
-	*/
 
 	public static class Numeric implements Text {
 		private int[] source;
@@ -189,7 +271,7 @@ public class SuffixArray {
 		public String toString() {
 			return Arrays.toString(source);
 		}
-		
+
 		public int[] value() {
 			return source;
 		}
@@ -251,11 +333,6 @@ public class SuffixArray {
 		//// insert valley suffixes
 		buckets.get_tail_ptrs();
 
-		/**
-		 * FIXME This is a puzzle: if I loop forwards, one example passes, but
-		 * if I loop backwards, the other example passes I actually think the
-		 * grader may be wrong. hmmmmm...
-		 */
 		// for (int i = 0; i < text.size(); ++i) {
 		for (int i = text.size() - 1; i >= 0; --i) {
 			if (types[i] == SuffixType.VALLEY) {
@@ -436,12 +513,11 @@ public class SuffixArray {
 		// vocab holds a (usually unsorted) array of chars/ints in a Text
 		private int[] vocab;
 		private int v_end;
-		// counts holds the number of occurences of `e` at `counts[e]`
+		// counts holds the number of occurrences of `e` at `counts[e]`
 		private int[] counts;
 		// pointers holds a pointer to the head or tail of bucket `e` at
 		// `pointers[e]`
 		private int[] pointers;
-		private boolean built_vocab = false;
 
 		public void insert_vocab(int e) {
 			// prn("inserting", e, "into vocab");
@@ -478,14 +554,9 @@ public class SuffixArray {
 			// this is big (!) but it simplifies element access
 			int last_in_vocab = vocab[vocab.length - 1];
 			pointers = new int[last_in_vocab + 1];
-
-			built_vocab = true;
 		}
 
 		public void get_head_ptrs() {
-			if (!built_vocab)
-				throw new IllegalStateException("Muffed it! You need to build the vocab list first.");
-
 			for (int i = 0, acc = 0; i < vocab.length; ++i) {
 				int e = vocab[i];
 				pointers[e] = acc;
@@ -494,9 +565,6 @@ public class SuffixArray {
 		}
 
 		public void get_tail_ptrs() {
-			if (!built_vocab)
-				throw new IllegalStateException("Muffed it! You need to build the vocab list first.");
-
 			for (int i = 0, acc = 0; i < vocab.length; ++i) {
 				int e = vocab[i];
 				acc += counts[e]; // acc now points to first head of next bucket
