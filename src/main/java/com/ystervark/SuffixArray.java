@@ -466,7 +466,7 @@ public class SuffixArray {
 		}
 
 		public void build_vocab_list(Text text) {
-			int alph_size = (text.size() > 256) ? text.size() : 256;
+			int alph_size = (text.size() > 512) ? text.size() / 2 : 256;
 			this.vocab = new int[alph_size];
 			this.counts = new int[alph_size];
 			this.v_end = 0;
