@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.TreeMap;
+
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -211,6 +214,7 @@ public class SuffixArray {
 			}
 		}
 
+		// prn("calculated lcp of", i, s.substring(i), "and", j, s.substring(j), "-->", lcp);
 		return lcp;
 	}
 
@@ -223,29 +227,35 @@ public class SuffixArray {
 		return pos;
 	}
 
-	public static int[] longestCommonPrefixArray(String str, int[] suffixArray) {
-		int[] lcpArray = new int[suffixArray.length - 1];
+	public static int[] longestCommonPrefixArray(String str, int[] order) {
+		int[] lcpArray = new int[order.length - 1];
 		int lcp = 0;
-		int[] posInOrder = invertSuffixArray(suffixArray);
-		int suffix = suffixArray[0];
+		int[] posInOrder = invertSuffixArray(order);
+		int suffix = order[0];
 
-		for (int i = 0; i < suffixArray.length - 1; ++i) {
+		for (int i = 0; i < order.length - 1; ++i) {
 			int orderIndex = posInOrder[suffix];
-			if (orderIndex == suffixArray.length - 1) {
+      // prn("suffix", suffix);
+			// prn("examining", orderIndex);
+			if (orderIndex == order.length - 1) {
+				// prn("that was the last lexicographic suffix in the string");
 				lcp = 0;
-				suffix = (suffix + 1) % suffixArray.length;
+				suffix = (suffix + 1) % order.length;
+        // prn("suffix is now", suffix);
+        --i; // don't want to lose a turn
 			} else {
-				int nextSuffix = suffixArray[orderIndex + 1];
+				int nextSuffix = order[orderIndex + 1];
 				lcp = longestCommonPrefix(str, suffix, nextSuffix, lcp - 1);
 				lcpArray[orderIndex] = lcp;
-				suffix = (suffix + 1) % suffixArray.length;
+				// prn("set lcpArray[" + orderIndex + "]", "to", lcp);
+				suffix = (suffix + 1) % order.length;
 			}
 		}
 
 		return lcpArray;
 	}
 
-	public static class TreeNode {
+	public static class TreeNode implements Iterable<TreeNode> {
 
 		private TreeNode parent;
 		private Map<Character, TreeNode> children;
@@ -341,6 +351,11 @@ public class SuffixArray {
 			parent = node;
 		}
 
+		@Override
+		public Iterator<TreeNode> iterator() {
+			Collection<TreeNode> childList = children.values();
+			return childList.iterator();
+		}
 	}
 
 	public static TreeNode createLeaf(TreeNode node, String s, int suffix) {
@@ -403,6 +418,18 @@ public class SuffixArray {
 		}
 
 		return root;
+	}
+
+	public static void depthFirstPrint(String s, TreeNode node) {
+		if (node.parent != null) {
+			int start = node.getEdgeStart();
+			int end = node.getEdgeEnd() + 1;
+			prn(start, end, s.subSequence(start, end));
+		}
+
+		for (TreeNode child : node) {
+			depthFirstPrint(s, child);
+		}
 	}
 
 	public static interface Text {
