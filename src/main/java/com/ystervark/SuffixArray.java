@@ -63,9 +63,18 @@ public class SuffixArray {
 		// stressTest();
 	}
 
-	public static int[] compute(String s) {
-		Numeric sa = new Numeric(new int[s.length()], 0, s.length());
-		Text text = new Alphabetic(s.toCharArray());
+	/**
+	 * <summary>Takes a string <code>str</code> and returns an array of type
+	 * <code>int[]</code>, consisting of indices into the string corresponding
+	 * to the lexicographically sorted suffixes of <code>str</code>.</summary>
+	 *
+	 * @param str
+	 *            the string for which to build the suffix array
+	 * @return the lexicographically sorted suffixes of s
+	 */
+	public static int[] compute(String str) {
+		Numeric sa = new Numeric(new int[str.length()], 0, str.length());
+		Text text = new Alphabetic(str);
 		Buckets buckets = new Buckets();
 		SAIS(text, sa, buckets);
 
@@ -192,42 +201,40 @@ public class SuffixArray {
 	}
 
 	public static class Alphabetic implements Text {
-		private char[] source;
+		private String source;
 
-		public Alphabetic(char[] c) {
-			source = c;
+		public Alphabetic(String s) {
+			source = s;
 		}
 
 		public int size() {
-			return source.length;
+			return source.length();
 		}
 
 		public int get_at(int i) {
-			return source[i];
+			return source.charAt(i);
 		}
 
 		public void set_at(int i, int v) {
-			source[i] = (char) v;
+			throw new UnsupportedOperationException("Don't mess with the original text, yo.");
 		}
 
 		public void pat_down() {
-			for (int i = 0; i < size(); ++i)
-				set_at(i, -1);
+			throw new UnsupportedOperationException("Don't mess with the original text, yo.");
 		}
 
 		public void pat_down(int start, int end) {
-			for (int i = start; i < end; ++i)
-				set_at(i, -1);
+			throw new UnsupportedOperationException("Don't mess with the original text, yo.");
 		}
 
 		public String toString() {
-			return Arrays.toString(source);
+			return source;
 		}
 
 		public int[] value() {
-			int[] ret = new int[source.length];
-			for (int i = 0; i < source.length; ++i) {
-				ret[i] = (int) source[i];
+			int[] ret = new int[source.length()];
+			for (int i = 0; i < source.length(); ++i) {
+				ret[i] = (int) source.charAt(i);
 			}
 			return ret;
 		}

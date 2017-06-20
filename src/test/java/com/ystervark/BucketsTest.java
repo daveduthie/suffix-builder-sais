@@ -19,8 +19,8 @@ public class BucketsTest {
 	public void setUp() {
 		b1 = new Buckets();
 		b2 = new Buckets();
-		text1 = new SuffixArray.Alphabetic("TGTGTGTGCACCG$".toCharArray());
-		text2 = new SuffixArray.Alphabetic("AACGATAGCGGTAGA$".toCharArray());
+		text1 = new SuffixArray.Alphabetic("TGTGTGTGCACCG$");
+		text2 = new SuffixArray.Alphabetic("AACGATAGCGGTAGA$");
 		b1.build_vocab_list(text1);
 		b2.build_vocab_list(text2);
 	}
