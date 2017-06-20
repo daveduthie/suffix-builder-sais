@@ -4,10 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.TreeMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+/**
+ * @author David Duthie
+ *
+ */
 public class SuffixArray {
 
 	public static void prn(Object... os) {
@@ -64,9 +70,9 @@ public class SuffixArray {
 	}
 
 	/**
-	 * <summary>Takes a string <code>str</code> and returns an array of type
-	 * <code>int[]</code>, consisting of indices into the string corresponding
-	 * to the lexicographically sorted suffixes of <code>str</code>.</summary>
+	 * <summary>Takes a string {@code str} and returns an array of type
+	 * {@code int[]}, consisting of indices into the string corresponding to the
+	 * lexicographically sorted suffixes of {@code str}.</summary>
 	 *
 	 * @param str
 	 *            the string for which to build the suffix array
@@ -78,16 +84,12 @@ public class SuffixArray {
 		Buckets buckets = new Buckets();
 		SAIS(text, sa, buckets);
 
-		// for (int i = 0; i < sa.size(); ++i) {
-		// int x = sa.get_at(i);
-		// prn(i, x, "->", s.substring(x));
-		// }
-
 		return sa.value();
 	}
 
 	public static int suffixCompare(String text, int[] suffixArray, String pattern, int pos, int skip) {
-		// prn("called suffixCompare at", pos, "-->", pattern, "==", text.substring(pos), "?");
+		// prn("called suffixCompare at", pos, "-->", pattern, "==",
+		// text.substring(pos), "?");
 		/* start skip after beginning of pattern */
 		int i = skip;
 		/*
@@ -109,8 +111,22 @@ public class SuffixArray {
 		return 0;
 	}
 
+	/**
+	 * This is a mess!
+	 *
+	 * <p>
+	 * Just take a look at that awful while loop...
+	 *
+	 * @param text
+	 * @param suffixArray
+	 * @param pattern
+	 * @param skip
+	 * @param first
+	 * @return
+	 */
 	public static int binarySearch(String text, int[] suffixArray, String pattern, int skip, boolean first) {
-		// prn("searching for", (first) ? "first" : "last", "position of", pattern, "in", text);
+		// prn("searching for", (first) ? "first" : "last", "position of",
+		// pattern, "in", text);
 
 		int lo = 0;
 		int hi = suffixArray.length - 1;
@@ -181,6 +197,212 @@ public class SuffixArray {
 		}
 
 		return locations;
+	}
+
+	// Suffix Array --> Suffix Tree code
+	public static int longestCommonPrefix(String s, int i, int j, int skip) {
+		int lcp = Math.max(0, skip);
+
+		while ((i + lcp < s.length()) && (j + lcp < s.length())) {
+			if (s.charAt(i + lcp) == s.charAt(j + lcp)) {
+				lcp += 1;
+			} else {
+				break;
+			}
+		}
+
+		return lcp;
+	}
+
+	public static int[] invertSuffixArray(int[] suffixArray) {
+		int[] pos = new int[suffixArray.length];
+		for (int i = 0; i < pos.length; ++i) {
+			pos[suffixArray[i]] = i;
+		}
+
+		return pos;
+	}
+
+	public static int[] longestCommonPrefixArray(String str, int[] suffixArray) {
+		int[] lcpArray = new int[suffixArray.length - 1];
+		int lcp = 0;
+		int[] posInOrder = invertSuffixArray(suffixArray);
+		int suffix = suffixArray[0];
+
+		for (int i = 0; i < suffixArray.length - 1; ++i) {
+			int orderIndex = posInOrder[suffix];
+			if (orderIndex == suffixArray.length - 1) {
+				lcp = 0;
+				suffix = (suffix + 1) % suffixArray.length;
+			} else {
+				int nextSuffix = suffixArray[orderIndex + 1];
+				lcp = longestCommonPrefix(str, suffix, nextSuffix, lcp - 1);
+				lcpArray[orderIndex] = lcp;
+				suffix = (suffix + 1) % suffixArray.length;
+			}
+		}
+
+		return lcpArray;
+	}
+
+	public static class TreeNode {
+
+		private TreeNode parent;
+		private Map<Character, TreeNode> children;
+		private int stringDepth;
+		private int edgeStart;
+		private int edgeEnd;
+
+		public TreeNode(TreeNode parent, int stringDepth, int edgeStart, int edgeEnd) {
+			this.parent = parent;
+			this.children = new TreeMap<Character, TreeNode>();
+			this.stringDepth = stringDepth;
+			this.edgeStart = edgeStart;
+			this.edgeEnd = edgeEnd;
+		}
+
+		/**
+		 * @param c
+		 *            the character to insert as a child
+		 */
+		public void addChild(char c) {
+			children.put(c, new TreeNode(this, -1, -1, -1));
+		}
+
+		/**
+		 * @param c
+		 *            the character to insert as a child
+		 * @param child
+		 *            the {@code TreeNode} to add as a child
+		 */
+		public void addChild(char c, TreeNode child) {
+			children.put(c, child);
+		}
+
+		/**
+		 * @return the stringDepth
+		 */
+		public int getStringDepth() {
+			return stringDepth;
+		}
+
+		/**
+		 * @param stringDepth
+		 *            the stringDepth to set
+		 */
+		public void setStringDepth(int stringDepth) {
+			this.stringDepth = stringDepth;
+		}
+
+		/**
+		 * @return the edgeStart
+		 */
+		public int getEdgeStart() {
+			return edgeStart;
+		}
+
+		/**
+		 * @param edgeStart
+		 *            the edgeStart to set
+		 */
+		public void setEdgeStart(int edgeStart) {
+			this.edgeStart = edgeStart;
+		}
+
+		/**
+		 * @return the edgeEnd
+		 */
+		public int getEdgeEnd() {
+			return edgeEnd;
+		}
+
+		/**
+		 * @param edgeEnd
+		 *            the edgeEnd to set
+		 */
+		public void setEdgeEnd(int edgeEnd) {
+			this.edgeEnd = edgeEnd;
+		}
+
+		/**
+		 * @param c
+		 *            the character to look up
+		 * @return child node matching c
+		 */
+		public TreeNode getChild(char c) {
+			return children.get(c);
+		}
+
+		/**
+		 * @param node
+		 *            the node to set as a parent
+		 */
+		public void setParent(TreeNode node) {
+			parent = node;
+		}
+
+	}
+
+	public static TreeNode createLeaf(TreeNode node, String s, int suffix) {
+		TreeNode leaf = new TreeNode(node, s.length() - suffix, suffix + node.getStringDepth(), s.length() - 1);
+		node.addChild(s.charAt(leaf.getEdgeStart()), leaf);
+		return leaf;
+	}
+
+	public static TreeNode breakEdge(TreeNode node, String s, int start, int offset) {
+		char startChar = s.charAt(start);
+		char midChar = s.charAt(start + offset);
+		TreeNode midNode = new TreeNode(node, node.getStringDepth() + offset, start, start + offset - 1);
+
+		midNode.addChild(midChar, node.getChild(startChar));
+		TreeNode child = node.getChild(startChar);
+		child.setParent(midNode);
+		child.setEdgeStart(start + offset);
+		node.addChild(startChar, midNode);
+
+		return midNode;
+	}
+
+	/**
+	 * NOTE: To iterate over edges in the order required in the assignment,
+	 * simply perform a depth-first traversal of the tree, outputting edges as
+	 * they are encountered.
+	 *
+	 * @param s
+	 *            the string we are interested in
+	 * @param suffixArray
+	 *            lexicographically sorted suffixes of s
+	 * @param lcpArray
+	 *            longest common prefixes for the suffixes
+	 * @return a tree
+	 */
+	public static TreeNode makeTree(String s, int[] suffixArray, int[] lcpArray) {
+		TreeNode root = new TreeNode(null, 0, -1, -1);
+		int lcpPrev = 0;
+		TreeNode currNode = root;
+
+		for (int i = 0; i < s.length(); ++i) {
+			int suffix = suffixArray[i];
+
+			while (currNode.getStringDepth() > lcpPrev) {
+				currNode = currNode.parent;
+			}
+
+			if (currNode.getStringDepth() == lcpPrev) {
+				currNode = createLeaf(currNode, s, suffix);
+			} else {
+				int edgeStart = suffixArray[i - 1] + currNode.getStringDepth();
+				int offset = lcpPrev - currNode.getStringDepth();
+				TreeNode midNode = breakEdge(currNode, s, edgeStart, offset);
+				currNode = createLeaf(midNode, s, suffix);
+			}
+
+			if (i < s.length() - 1) {
+				lcpPrev = lcpArray[i];
+			}
+		}
+
+		return root;
 	}
 
 	public static interface Text {
