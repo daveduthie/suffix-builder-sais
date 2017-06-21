@@ -55,9 +55,21 @@ public class MatchTest {
 
 	@Test
 	public void test5() {
-      String[] patterns = { "BA", "D", "G" };
+		String[] patterns = { "BA", "D", "G" };
 		HashSet<Integer> result = SuffixArray.multiMatchesInText(text, patterns);
 		int[] expect = { 1, 4 };
+		for (int e : expect) {
+			assertTrue("contains " + e, result.contains(e));
+		}
+	}
+
+	@Test
+	public void test6() {
+		// ----------- 01234567891012141618202224262830323436384042444648 --- 49
+		String text = "TCCTCTATGAGATCCTATTCTATGAAACCTTCAGACCAAAATTCTCCGGC" + "$";
+		String[] patterns = { "CCT", "CAC", "GAG", "CAG", "ATC" };
+		HashSet<Integer> result = SuffixArray.multiMatchesInText(text, patterns);
+		int[] expect = { 1, 13, 27, 31, 8, 11 };
 		for (int e : expect) {
 			assertTrue("contains " + e, result.contains(e));
 		}

@@ -3,15 +3,14 @@ package com.ystervark;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.TreeMap;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 /**
  * @author David Duthie
@@ -28,7 +27,7 @@ public class SuffixArray {
 	public static void prnBool(boolean[] bs) {
 		for (int i = 0; i < bs.length; ++i) {
 			if (bs[i]) {
-				System.out.println(i);
+				System.out.print(i + " ");
 			}
 		}
 		System.out.println();
@@ -62,7 +61,9 @@ public class SuffixArray {
 		for (int patternIndex = 0; patternIndex < patternCount; ++patternIndex) {
 			String pattern = scanner.next();
 			HashSet<Integer> occurrences = matchesInText(text, suffixArray, pattern);
+			// prn("computed matches for", pattern, "\n");
 			for (int x : occurrences) {
+				// prn("setting", x, "to true");
 				occurs[x] = true;
 			}
 		}
@@ -157,7 +158,7 @@ public class SuffixArray {
 				}
 			} else if (cmp < 0) {
 				// gotta look lower
-				hi = mid;
+				hi = mid - 1;
 			} else if (cmp > 0) {
 				// gotta look higher
 				lo = mid + 1;
@@ -172,6 +173,12 @@ public class SuffixArray {
 
 	public static HashSet<Integer> matchesInText(String text, int[] sa, String pattern) {
 		int skip = 0;
+		HashSet<Integer> result = new HashSet<Integer>();
+
+		// check for empty pattern
+		if (pattern.length() == 0 || text.length() == 0) {
+			return result;
+		}
 
 		// find first idx of match
 		int firstIdx = binarySearch(text, sa, pattern, skip, true);
@@ -179,7 +186,6 @@ public class SuffixArray {
 		int lastIdx = binarySearch(text, sa, pattern, skip, false);
 		// prn("matches are between", firstIdx, "and", lastIdx);
 
-		HashSet<Integer> result = new HashSet<Integer>();
 		if (firstIdx != -1) {
 			for (int i = firstIdx; i <= lastIdx; ++i) {
 				result.add(sa[i]);
@@ -214,7 +220,8 @@ public class SuffixArray {
 			}
 		}
 
-		// prn("calculated lcp of", i, s.substring(i), "and", j, s.substring(j), "-->", lcp);
+		// prn("calculated lcp of", i, s.substring(i), "and", j, s.substring(j),
+		// "-->", lcp);
 		return lcp;
 	}
 
@@ -235,14 +242,14 @@ public class SuffixArray {
 
 		for (int i = 0; i < order.length - 1; ++i) {
 			int orderIndex = posInOrder[suffix];
-      // prn("suffix", suffix);
+			// prn("suffix", suffix);
 			// prn("examining", orderIndex);
 			if (orderIndex == order.length - 1) {
 				// prn("that was the last lexicographic suffix in the string");
 				lcp = 0;
 				suffix = (suffix + 1) % order.length;
-        // prn("suffix is now", suffix);
-        --i; // don't want to lose a turn
+				// prn("suffix is now", suffix);
+				--i; // don't want to lose a turn
 			} else {
 				int nextSuffix = order[orderIndex + 1];
 				lcp = longestCommonPrefix(str, suffix, nextSuffix, lcp - 1);
@@ -353,8 +360,7 @@ public class SuffixArray {
 
 		@Override
 		public Iterator<TreeNode> iterator() {
-			Collection<TreeNode> childList = children.values();
-			return childList.iterator();
+			return children.values().iterator();
 		}
 	}
 
@@ -420,16 +426,16 @@ public class SuffixArray {
 		return root;
 	}
 
-	public static void depthFirstPrint(String s, TreeNode node) {
+	public static ArrayList<TreeNode> depthFirstList(ArrayList<TreeNode> ls, String s, TreeNode node) {
 		if (node.parent != null) {
-			int start = node.getEdgeStart();
-			int end = node.getEdgeEnd() + 1;
-			prn(start, end, s.subSequence(start, end));
+			ls.add(node);
 		}
 
 		for (TreeNode child : node) {
-			depthFirstPrint(s, child);
+			depthFirstList(ls, s, child);
 		}
+
+		return ls;
 	}
 
 	public static interface Text {
@@ -779,15 +785,22 @@ public class SuffixArray {
 			// prn("inserting", e, "into vocab");
 			// prn("v_end=", v_end);
 			if (e >= counts.length) {
-				// counts = java.util.Arrays.copyOf(counts, e + 1);
-				throw new IllegalArgumentException(
-						"You said your alphabet was < " + vocab.length + " but now you've given me an " + e + "!");
+				counts = java.util.Arrays.copyOf(counts, e * 2);
+				// throw new IllegalArgumentException("You said your alphabet
+				// was < " + vocab.length + " but now you've given me an " + e +
+				// "!");
 			}
 
 			// this means it's the first time we're encountering this
 			// character
-			if (counts[e] == 0)
+			if (counts[e] == 0) {
+				if (v_end >= vocab.length) {
+					vocab = java.util.Arrays.copyOf(vocab, v_end * 2);
+				}
+
 				vocab[v_end++] = e;
+			}
+
 			counts[e] += 1;
 		}
 
@@ -865,24 +878,91 @@ public class SuffixArray {
 		return res;
 	}
 
-	public static void stressTest() {
-		while (true) {
-			Random r = new Random();
-			int len = r.nextInt(120);
-			StringBuilder b = new StringBuilder();
-			for (int i = 0; i < len; ++i) {
-				char c = (char) (r.nextInt(26) + 65);
-				b.append(c);
+	public static HashSet<Integer> naivePatternMatch(String text, String pattern) {
+		HashSet<Integer> result = new HashSet<Integer>();
+
+		// check for empty strings
+		if (text.length() == 0 || pattern.length() == 0) {
+			return result;
+		}
+
+		for (int i = 0; i < text.length(); ++i) {
+			for (int j = i, k = 0; j < text.length() && k < pattern.length(); ++j, ++k) {
+				if (text.charAt(j) != pattern.charAt(k)) {
+					break;
+				}
+
+				if (k == pattern.length() - 1) {
+					result.add(i);
+				}
 			}
+		}
+		return result;
+	}
+
+	public static HashSet<Integer> naiveMultiPatternMatch(String text, String[] patterns) {
+		HashSet<Integer> totalMatches = new HashSet<Integer>();
+
+		for (String p : patterns) {
+			totalMatches.addAll(naivePatternMatch(text, p));
+		}
+
+		return totalMatches;
+	}
+
+	public static String makeRandomString(int len, boolean appendDollar) {
+		Random r = new Random();
+		StringBuilder b = new StringBuilder(len + 1);
+
+		for (int i = 0; i < len; ++i) {
+			char c = (char) (r.nextInt(4) + 65);
+			b.append(c);
+		}
+
+		if (appendDollar) {
 			b.append('$');
-			String s = b.toString();
-			prn("str:", s);
+		}
 
-			int[] expect = naiveSuffixArray(s);
-			int[] actual = compute(s);
+		return b.toString();
+	}
 
-			if (!Arrays.equals(expect, actual)) {
-				throw new IllegalStateException("Bliksem! It breaks on input:\n" + s);
+	public static void stressTest() {
+		Random r = new Random();
+
+		while (true) {
+			int textLen = r.nextInt(10000);
+			String text = makeRandomString(textLen, true);
+
+			int numPatterns = r.nextInt(1000);
+			String[] patterns = new String[numPatterns];
+			for (int i = 0; i < numPatterns; ++i) {
+				int patternLen = r.nextInt(1000);
+				String pattern = makeRandomString(patternLen, false);
+				patterns[i] = pattern;
+			}
+
+			prn("text:", text);
+			for (String p : patterns) {
+				prn("_patt:", p);
+			}
+
+			HashSet<Integer> matches = multiMatchesInText(text, patterns);
+			HashSet<Integer> expect = naiveMultiPatternMatch(text, patterns);
+
+			for (int e : expect) {
+				if (!matches.contains(e)) {
+					throw new IllegalStateException("Broken:\ntext: " + text + "\npatt: " + patterns.toString()
+							+ "\nand " + e + " is not in matches");
+				}
+			}
+
+			for (int m : matches) {
+				if (!expect.contains(m)) {
+					throw new IllegalStateException("Broken:\ntext:" + text + "\npatt:" + patterns.toString() + "\nand "
+							+ m + " is in matches when it shouldn't be");
+				} else {
+					prn("++++++++++++++++++++++++++++++++++++++++++++++> match:", m);
+				}
 			}
 		}
 	}
