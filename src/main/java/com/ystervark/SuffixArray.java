@@ -47,28 +47,35 @@ public class SuffixArray {
 			return tok.nextToken();
 		}
 
-		int nextint() throws IOException {
+		int nextInt() throws IOException {
 			return Integer.parseInt(next());
 		}
 	}
 
 	public static void main(String[] args) throws IOException {
 		fastscanner scanner = new fastscanner();
-		String text = scanner.next() + "$";
-		int[] suffixArray = compute(text);
-		int patternCount = scanner.nextint();
-		boolean[] occurs = new boolean[text.length()];
-		for (int patternIndex = 0; patternIndex < patternCount; ++patternIndex) {
-			String pattern = scanner.next();
-			HashSet<Integer> occurrences = matchesInText(text, suffixArray, pattern);
-			// prn("computed matches for", pattern, "\n");
-			for (int x : occurrences) {
-				// prn("setting", x, "to true");
-				occurs[x] = true;
-			}
+
+		String text = scanner.next();
+
+		int[] suffixArray = new int[text.length()];
+		for (int i = 0; i < suffixArray.length; ++i) {
+			suffixArray[i] = scanner.nextInt();
 		}
 
-		prnBool(occurs);
+		int[] lcpArray = new int[text.length() - 1];
+		for (int i = 0; i < lcpArray.length; ++i) {
+			lcpArray[i] = scanner.nextInt();
+		}
+
+		prn(text);
+
+		TreeNode tree = makeTree(text, suffixArray, lcpArray);
+		ArrayList<TreeNode> linearisedTree = new ArrayList<TreeNode>();
+		depthFirstList(linearisedTree, text, tree);
+
+		for (TreeNode n : linearisedTree) {
+			prn(n.getEdgeStart(), n.getEdgeEnd() + 1);
+		}
 
 		// stressTest();
 	}
@@ -370,18 +377,20 @@ public class SuffixArray {
 		return leaf;
 	}
 
-	public static TreeNode breakEdge(TreeNode node, String s, int start, int offset) {
+	public static TreeNode breakEdge(TreeNode parentNode, String s, int start, int offset) {
+		// prn("called breakEdge with start:", start, "and offset:", offset);
 		char startChar = s.charAt(start);
 		char midChar = s.charAt(start + offset);
-		TreeNode midNode = new TreeNode(node, node.getStringDepth() + offset, start, start + offset - 1);
+		TreeNode upperNode = new TreeNode(parentNode, parentNode.getStringDepth() + offset, start, start + offset - 1);
 
-		midNode.addChild(midChar, node.getChild(startChar));
-		TreeNode child = node.getChild(startChar);
-		child.setParent(midNode);
-		child.setEdgeStart(start + offset);
-		node.addChild(startChar, midNode);
+		TreeNode lowerNode = parentNode.getChild(startChar);
 
-		return midNode;
+		upperNode.addChild(midChar, lowerNode);
+		lowerNode.setParent(upperNode);
+		lowerNode.setEdgeStart(lowerNode.getEdgeStart() + offset);
+		parentNode.addChild(startChar, upperNode);
+
+		return upperNode;
 	}
 
 	/**
@@ -402,24 +411,71 @@ public class SuffixArray {
 		int lcpPrev = 0;
 		TreeNode currNode = root;
 
+		////////////////////////
+		// ArrayList<TreeNode> linear;
+		// int start, end, depth;
+		////////////////////////
+
 		for (int i = 0; i < s.length(); ++i) {
 			int suffix = suffixArray[i];
+			// prn("inserting", suffix, ":", s.substring(suffix));
 
 			while (currNode.getStringDepth() > lcpPrev) {
 				currNode = currNode.parent;
 			}
+
+			///////////////////////
+			// depth = currNode.getStringDepth();
+			// start = currNode.getEdgeStart();
+			// end = currNode.getEdgeEnd();
+			// String sub = (start != -1) ? s.substring(start, end + 1) :
+			/////////////////////// "ROOT";
+			// prn("currNode is:", depth, start, end, sub);
+			///////////////////////
 
 			if (currNode.getStringDepth() == lcpPrev) {
 				currNode = createLeaf(currNode, s, suffix);
 			} else {
 				int edgeStart = suffixArray[i - 1] + currNode.getStringDepth();
 				int offset = lcpPrev - currNode.getStringDepth();
+				////////////////////////
+				// prn("depth:", currNode.getStringDepth(), "edgeStart:",
+				//////////////////////// edgeStart, "offset:", offset);
+				////////////////////////
+
 				TreeNode midNode = breakEdge(currNode, s, edgeStart, offset);
+
+				//////////////////////////
+				// linear = new ArrayList<TreeNode>();
+				// depthFirstList(linear, s, root);
+				// prn("AFTER BREAK");
+				// for (TreeNode n : linear) {
+				// start = n.getEdgeStart();
+				// end = n.getEdgeEnd() + 1;
+				// prn(start, end, s.substring(start, end));
+				// }
+				//////////////////////////
+
 				currNode = createLeaf(midNode, s, suffix);
 			}
 
-			if (i < s.length() - 1) {
+			/////////////////
+			// prn("AFTER INSERTION:");
+			// linear = new ArrayList<TreeNode>();
+			// depthFirstList(linear, s, root);
+			// for (TreeNode n : linear) {
+			// start = n.getEdgeStart();
+			// end = n.getEdgeEnd() + 1;
+			// prn(start, end, s.substring(start, end));
+			// }
+			// prn("=============================================");
+			/////////////////
+
+			if (i < lcpArray.length) {
 				lcpPrev = lcpArray[i];
+				/////////////////
+				// prn("set lcpPrev to", lcpPrev);
+				/////////////////
 			}
 		}
 
