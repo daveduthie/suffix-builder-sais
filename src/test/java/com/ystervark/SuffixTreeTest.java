@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.ystervark.SuffixArray.TreeNode;
+import com.ystervark.Tree.TreeNode;
 
 public class SuffixTreeTest {
 
@@ -24,58 +24,46 @@ public class SuffixTreeTest {
 	}
 
 	@Test
-  @Ignore
+	@Ignore
 	public void testMakeTree() {
 		String s = "AAA$";
-		int[] suffArray = SuffixArray.compute(s);
-		int[] lcpArray = SuffixArray.longestCommonPrefixArray(s, suffArray);
-		SuffixArray.TreeNode root = SuffixArray.makeTree(s, suffArray, lcpArray);
+		int[] suffArray = SuffixArray.computeSA(s);
+		int[] lcpArray = Tree.longestCommonPrefixArray(s, suffArray);
+		Tree.TreeNode root = Tree.makeTree(s, suffArray, lcpArray);
 
-		ArrayList<SuffixArray.TreeNode> ls = new ArrayList<SuffixArray.TreeNode>();
-		SuffixArray.depthFirstList(ls, s, root);
-
-		for (TreeNode e : ls) {
-			int start = e.getEdgeStart();
-			int end = e.getEdgeEnd() + 1;
-			SuffixArray.prn(start, end, s.substring(start, end));
-		}
+		ArrayList<TreeNode> ls = new ArrayList<TreeNode>();
+		Tree.depthFirstList(ls, s, root);
 	}
 
 	@Test
 	public void testMakeTree2() {
 		String s = "ATAAATG" + "$";
-		int[] suffArray = SuffixArray.compute(s);
-		int[] lcpArray = SuffixArray.longestCommonPrefixArray(s, suffArray);
-		SuffixArray.TreeNode root = SuffixArray.makeTree(s, suffArray, lcpArray);
+		int[] suffArray = SuffixArray.computeSA(s);
+		int[] lcpArray = Tree.longestCommonPrefixArray(s, suffArray);
+		TreeNode root = Tree.makeTree(s, suffArray, lcpArray);
 
-		ArrayList<SuffixArray.TreeNode> linear = new ArrayList<SuffixArray.TreeNode>();
-		SuffixArray.depthFirstList(linear, s, root);
+		ArrayList<TreeNode> linear = new ArrayList<TreeNode>();
+		Tree.depthFirstList(linear, s, root);
 
-    String[] expect = {"$", "A", "A", "ATG$", "TG$", "T", "AAATG$", "G$", "G$", "T", "AAATG$", "G$"};
+		String[] expect = { "$", "A", "A", "ATG$", "TG$", "T", "AAATG$", "G$", "G$", "T", "AAATG$", "G$" };
 
 		for (int i = 0; i < linear.size(); ++i) {
-        int start = linear.get(i).getEdgeStart();
-        int end = linear.get(i).getEdgeEnd() + 1;
-        assertTrue(s.substring(start, end).equals(expect[i]));
-        SuffixArray.prn(start, end, "-->", s.substring(start, end));
+			int start = linear.get(i).getEdgeStart();
+			int end = linear.get(i).getEdgeEnd() + 1;
+			assertTrue(s.substring(start, end).equals(expect[i]));
+			// SuffixArray.prn(start, end, "-->", s.substring(start, end));
 		}
 	}
 
 	@Test
-  @Ignore
+	@Ignore
 	public void testMakeTree3() {
 		String s = "ABABAA" + "$";
-		int[] suffArray = SuffixArray.compute(s);
-		int[] lcpArray = SuffixArray.longestCommonPrefixArray(s, suffArray);
-		SuffixArray.TreeNode root = SuffixArray.makeTree(s, suffArray, lcpArray);
+		int[] suffArray = SuffixArray.computeSA(s);
+		int[] lcpArray = Tree.longestCommonPrefixArray(s, suffArray);
+		TreeNode root = Tree.makeTree(s, suffArray, lcpArray);
 
-		ArrayList<SuffixArray.TreeNode> ls = new ArrayList<SuffixArray.TreeNode>();
-		SuffixArray.depthFirstList(ls, s, root);
-
-		for (TreeNode e : ls) {
-			int start = e.getEdgeStart();
-			int end = e.getEdgeEnd() + 1;
-			SuffixArray.prn(start, end, s.substring(start, end));
-		}
+		ArrayList<TreeNode> ls = new ArrayList<TreeNode>();
+		Tree.depthFirstList(ls, s, root);
 	}
 }
