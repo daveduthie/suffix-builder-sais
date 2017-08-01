@@ -16,7 +16,7 @@ public class MatchTest {
 	public void setUp() {
 		// ---- 012345678
 		text = "ABABDABC$";
-		sa = SuffixArray.computeSA(text);
+		sa = SuffixArray.compute(text);
 	}
 
 	@Test

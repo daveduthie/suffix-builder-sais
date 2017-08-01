@@ -92,7 +92,7 @@ public class Matching {
 	}
 
 	public static HashSet<Integer> multiMatchesInText(String text, String[] patterns) {
-		int[] sa = SuffixArray.computeSA(text);
+		int[] sa = SuffixArray.compute(text);
 		HashSet<Integer> locations = new HashSet<Integer>();
 		for (String p : patterns) {
 			// prn("examining", p);
